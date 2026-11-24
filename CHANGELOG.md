@@ -19,6 +19,13 @@ Two things are versioned separately from this file and worth knowing about:
 
 ## [Unreleased]
 
+### Fixed
+
+- In the iPhone app, tapping the sign-in fields or the chat composer no longer
+  slides the whole console up and back down. The web view now ends at the
+  keyboard's top instead of letting WebKit pan the page, so the composer
+  settles just above the keyboard (#3283).
+
 ## [1.92.0] - 2026-11-23
 
 ### Added

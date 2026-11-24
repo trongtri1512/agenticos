@@ -10,6 +10,8 @@ class AppPrivacyPlugin: Plugin {
 
   override func load(webview: WKWebView) {
     self.webview = webview
+    // Loaded on every iPhone with the app's one web view: see KeyboardFit.
+    KeyboardFit.install(on: webview)
     NotificationCenter.default.addObserver(
       self, selector: #selector(hidePreview),
       name: UIApplication.willResignActiveNotification, object: nil)
