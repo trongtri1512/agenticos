@@ -99,3 +99,18 @@ it("keeps Sources at a readable bounded pixel width while leaving room for the c
   fireEvent(resize, new MouseEvent("dblclick", { bubbles: true }));
   expect(resize).toHaveAttribute("aria-valuenow", "400");
 });
+it("keeps its header clear of a phone's status bar when it covers the screen", () => {
+  // On a phone the panel covers the screen, under the status bar and home
+  // indicator; its header and close button sat beneath the clock.
+  const view = panel();
+  const aside = view.container.querySelector("aside")!;
+  expect(aside.className).toContain(
+    "pt-[max(var(--shell-inset-top,0px),env(safe-area-inset-top))]",
+  );
+  expect(aside.className).toContain("pb-[env(safe-area-inset-bottom)]");
+  // Docked beside the chat it sits below the console's header instead.
+  expect(aside.className).toContain("@min-[900px]/browser-layout:pt-0");
+  // Inside another surface, that surface clears the status bar.
+  const inside = render(<BrowserPanelFrame contained>{() => null}</BrowserPanelFrame>);
+  expect(inside.container.querySelector("aside")!.className).not.toContain("safe-area-inset-top");
+});
