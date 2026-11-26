@@ -132,3 +132,40 @@ it("announces the capped dock width and resizes from it on the first keypress", 
   expect(resize).toHaveAttribute("aria-valuemax", "420");
   expect(resize).toHaveAttribute("aria-valuenow", "380");
 });
+
+it("measures the chat row, not a wrapper that draws no box of its own", () => {
+  // Files sits in a wrapper that only hides it on a narrow screen. Measured as the
+  // dock, that wrapper capped and resized the panel against its own few hundred pixels.
+  const observed: Element[] = [];
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe(target: Element) {
+        observed.push(target);
+      }
+      disconnect() {}
+    },
+  );
+  vi.stubGlobal("PointerEvent", MouseEvent);
+  render(
+    <div data-testid="row">
+      <div style={{ display: "contents" }}>
+        <BrowserPanelFrame sizing="sources" layout="sources">
+          {() => <span>Files</span>}
+        </BrowserPanelFrame>
+      </div>
+    </div>,
+  );
+  const row = screen.getByTestId("row");
+  expect(observed).toEqual([row]);
+  vi.spyOn(row, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 1200, 700));
+  vi.spyOn(row.firstElementChild!, "getBoundingClientRect").mockReturnValue(
+    new DOMRect(0, 0, 294, 700),
+  );
+  const resize = screen.getByRole("separator");
+  Object.defineProperty(resize, "setPointerCapture", { value: vi.fn() });
+  fireEvent.pointerDown(resize, { button: 0 });
+  fireEvent.pointerMove(resize, { clientX: 810 });
+  expect(resize).toHaveAttribute("aria-valuenow", "390");
+  fireEvent.pointerUp(resize);
+});

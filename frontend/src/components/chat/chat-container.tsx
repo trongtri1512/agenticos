@@ -2070,12 +2070,17 @@ function ChatUI({
         />
       </div>
       {/* Docked panels must be direct children of the chat row: both the percentage
-          width and pointer resize measure that parent. Embedded Files stays contained. */}
+          width and pointer resize measure that parent. Embedded Files stays contained.
+          Outside the main chat a wrapper hides Files on a narrow screen; it draws no box
+          (`contents`), or the panel's 38% would be a share of the wrapper - whose width
+          is the panel's own - and Files would open about a hundred pixels wide. */}
       <SourcesPanel contained={compact} conversationId={conversationId} />
       {mainChat ? (
         workspaceFiles
       ) : (
-        <div className="hidden h-full min-h-0 shrink-0 lg:block">{workspaceFiles}</div>
+        <div data-workspace-files-dock className="hidden lg:contents">
+          {workspaceFiles}
+        </div>
       )}
     </div>
   );
