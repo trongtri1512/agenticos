@@ -491,6 +491,25 @@ function observeSizes() {
   return observers;
 }
 
+describe("the chat container - the Files panel", () => {
+  it("docks Files in the chat row, so its width is a share of the chat", () => {
+    // The panel is `min(400px, 38%)` wide, and the percentage resolves against its
+    // containing block. A wrapper with a box of its own made that the panel's own
+    // width: about a hundred pixels on a desktop, one letter of every file name.
+    for (const main of [true, false]) {
+      const view = mount(undefined, main);
+      const dock = view.container.querySelector("[data-workspace-files-dock]")!;
+      expect(dock.parentElement).toHaveClass("chat-surface");
+      const classes = dock.className.split(/\s+/);
+      expect(classes).toContain(main ? "contents" : "lg:contents");
+      // On a narrow screen outside the main chat it stays hidden, as before.
+      expect(classes.includes("hidden")).toBe(!main);
+      expect(classes.some((name) => /(^|:)(block|w-|h-full|shrink-0)/.test(name))).toBe(false);
+      view.unmount();
+    }
+  });
+});
+
 describe("the chat container - following the transcript", () => {
   afterEach(() => vi.unstubAllGlobals());
 

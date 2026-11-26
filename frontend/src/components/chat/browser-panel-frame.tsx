@@ -12,6 +12,20 @@ const WIDTHS = {
   sources: { min: 360, max: 420, initial: 400, step: 16 },
 } as const;
 
+/**
+ * The row the panel docks in - what its percentage width and a pointer resize measure.
+ *
+ * Its parent, unless that parent only groups it (`display: contents`, such as the
+ * wrapper that hides Files on a narrow screen): such an element has no box, so it is
+ * the next ancestor that the CSS percentage resolves against, and measuring the
+ * wrapper instead would answer zero.
+ */
+function dockOf(panel: HTMLElement | null): HTMLElement | null {
+  let dock = panel?.parentElement ?? null;
+  while (dock && getComputedStyle(dock).display === "contents") dock = dock.parentElement;
+  return dock;
+}
+
 /** Dock in the available chat width; narrow chats and explicit expansion use the full screen. */
 export function BrowserPanelFrame({
   children,
@@ -96,7 +110,7 @@ export function BrowserPanelFrame({
           }}
           onPointerMove={(event) => {
             if (!dragging) return;
-            const bounds = panel.current?.parentElement?.getBoundingClientRect();
+            const bounds = dockOf(panel.current)?.getBoundingClientRect();
             if (bounds && bounds.width > 0)
               setWidth(
                 bounded(

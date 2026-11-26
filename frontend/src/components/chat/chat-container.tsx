@@ -2063,11 +2063,12 @@ function ChatUI({
           button among the composer's controls until somebody opens it, because a
           permanent third column took space from every conversation including the
           ones where the agent keeps nothing. Hidden on a narrow screen, where there
-          is no room for it. */}
+          is no room for it. The wrapper only hides it there: it draws no box of its own
+          (`contents`), so the docked panel's `min(400px, 38%)` is a share of the chat
+          row, as the Sources panel's is - inside a box sized by the panel itself, the
+          38% resolved to about a hundred pixels and every file name to one letter. */}
       <SourcesPanel contained={compact} conversationId={conversationId} />
-      <div
-        className={mainChat ? "h-full min-h-0 shrink-0" : "hidden h-full min-h-0 shrink-0 lg:block"}
-      >
+      <div data-workspace-files-dock className={mainChat ? "contents" : "hidden lg:contents"}>
         <WorkspaceFiles
           key={conversationId ?? "new"}
           beforeFirstMessage={mainChat && messages.length === 0}

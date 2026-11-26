@@ -100,6 +100,31 @@ it("keeps Sources at a readable bounded pixel width while leaving room for the c
   fireEvent(resize, new MouseEvent("dblclick", { bubbles: true }));
   expect(resize).toHaveAttribute("aria-valuenow", "400");
 });
+it("measures the chat row, not a wrapper that draws no box of its own", () => {
+  // Files sits in a wrapper that only hides it on a narrow screen. Measured as the
+  // dock, that wrapper turned a drag into a width against its own few hundred pixels.
+  vi.stubGlobal("PointerEvent", MouseEvent);
+  render(
+    <div data-testid="row">
+      <div style={{ display: "contents" }}>
+        <BrowserPanelFrame sizing="sources" layout="sources">
+          {() => <span>Files</span>}
+        </BrowserPanelFrame>
+      </div>
+    </div>,
+  );
+  const row = screen.getByTestId("row");
+  vi.spyOn(row, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 1200, 700));
+  vi.spyOn(row.firstElementChild!, "getBoundingClientRect").mockReturnValue(
+    new DOMRect(0, 0, 294, 700),
+  );
+  const resize = screen.getByRole("separator");
+  Object.defineProperty(resize, "setPointerCapture", { value: vi.fn() });
+  fireEvent.pointerDown(resize, { button: 0 });
+  fireEvent.pointerMove(resize, { clientX: 810 });
+  expect(resize).toHaveAttribute("aria-valuenow", "390");
+  fireEvent.pointerUp(resize);
+});
 it("keeps its header clear of a phone's status bar when it covers the screen", () => {
   // On a phone the panel covers the screen, under the status bar and home
   // indicator; its header and close button sat beneath the clock.
